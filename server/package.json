@@ -1,0 +1,16 @@
+{
+  "name": "cloud-hdr-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloud HDR — локальный агент управления Windows для ИИ-помощника Cloud HDR AI",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}

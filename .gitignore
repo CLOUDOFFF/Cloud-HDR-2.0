@@ -1,0 +1,42 @@
+# Репозиторий живёт прямо на рабочем столе, поэтому по умолчанию
+# игнорируется всё, а части проекта включаются явно.
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/LICENSE
+!/ПРОЧТИ.txt
+!/Установить.cmd
+!/Удалить.cmd
+!/desktop/
+!/public/
+!/server/
+!/python/
+!/setup/
+!/docs/
+
+# --- тяжёлое и личное: не для git --------------------------------------------
+# своя копия Python 3.12 с torch (5 ГБ)
+/runtime/
+# веса модели — в GitHub Releases
+/python/checkpoints/
+# XTTS v2, opus-mt, NLU — скачиваются отдельно
+/python/models/
+/python/voice-env/
+# клон голоса владельца
+/python/voices/
+# обучающие корпуса и индекс файлов
+/python/data/
+
+# --- мусор ---------------------------------------------------------------------
+/server/logs/
+__pycache__/
+*.pyc
+*.log
+*.err
+*.out
+*.bak*
+
+# результаты сравнения моделей
+/python/compare_*.json
+/python/compare_*.txt
