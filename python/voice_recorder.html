@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Голос для Cloud HDR</title>
+<style>
+:root {
+  --bg: #F7EFE3; --bg2: #EFE3D1; --paper: #FFFBF5; --paper2: #F3E8D8; --line: #E6D6BF;
+  --txt: #2B1A0C; --dim: #6B5440; --mute: #9A8570; --or: #EE7B24; --on: #2A1608; --err: #B8401F;
+  --font: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #17110B; --bg2: #211810; --paper: #1F1710; --paper2: #2A1F15; --line: #3A2C1F;
+          --txt: #F3E6D4; --dim: #BFA88E; --mute: #8C765F; --or: #F58A36; --err: #F0785C; }
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+body {
+  background: radial-gradient(70% 60% at 85% -10%, color-mix(in srgb, var(--or) 16%, transparent), transparent 70%),
+              radial-gradient(60% 50% at 0% 110%, color-mix(in srgb, #E2B67C 16%, transparent), transparent 70%), var(--bg);
+  color: var(--txt); font: 15px/1.6 var(--font); -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column; align-items: center; padding: 36px 24px;
+}
+header { display: flex; align-items: center; gap: 12px; width: min(720px, 100%); }
+header svg { width: 34px; height: 22px; }
+header b { font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
+header span { margin-left: auto; font-size: 13px; color: var(--mute); }
+h1 { width: min(720px, 100%); margin: 34px 0 6px; font-size: 30px; font-weight: 650; letter-spacing: -.03em; line-height: 1.15; }
+.lead { width: min(720px, 100%); color: var(--dim); margin-bottom: 24px; }
+.script { width: min(720px, 100%); display: flex; flex-direction: column; gap: 10px; }
+.script p {
+  padding: 16px 20px; border-radius: 18px; font-size: 19px; line-height: 1.55; color: var(--mute);
+  background: transparent; transition: background .35s, color .35s, box-shadow .35s; cursor: pointer;
+}
+.script p.now { background: var(--paper); color: var(--txt); box-shadow: inset 0 0 0 1px var(--line), 0 12px 30px -20px rgba(58,36,18,.45); }
+.script p.done { color: color-mix(in srgb, var(--mute) 70%, transparent); }
+.script p .hint { display: block; font-size: 12.5px; color: var(--or); margin-bottom: 4px; letter-spacing: .02em; }
+.dock {
+  position: sticky; bottom: 20px; margin-top: 26px; width: min(720px, 100%);
+  display: flex; align-items: center; gap: 16px; padding: 12px 14px 12px 20px; border-radius: 26px;
+  background: color-mix(in srgb, var(--paper) 92%, transparent); box-shadow: inset 0 0 0 1px var(--line), 0 18px 40px -24px rgba(58,36,18,.5);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.meter { flex: 1; display: flex; align-items: center; gap: 3px; height: 34px; }
+.meter i { flex: 1; height: 4px; border-radius: 3px; background: var(--line); transition: height .08s, background .2s; }
+.time { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 52px; text-align: right; color: var(--dim); }
+button { font: 600 15px var(--font); border: 0; cursor: pointer; border-radius: 999px; transition: transform .15s, background .2s, opacity .2s; }
+button:active { transform: scale(.97); }
+.rec { display: flex; align-items: center; gap: 10px; padding: 13px 22px; background: var(--txt); color: var(--bg); }
+.rec i { width: 12px; height: 12px; border-radius: 50%; background: var(--or); }
+.rec.on { background: var(--or); color: var(--on); }
+.rec.on i { background: var(--on); border-radius: 3px; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+.ghost { padding: 12px 18px; background: transparent; color: var(--dim); box-shadow: inset 0 0 0 1px var(--line); }
+.ghost:hover { color: var(--txt); background: var(--paper2); }
+.state { width: min(720px, 100%); margin-top: 22px; padding: 22px 24px; border-radius: 22px; background: var(--paper);
+         box-shadow: inset 0 0 0 1px var(--line); display: none; }
+.state.show { display: block; }
+.state b { font-size: 18px; letter-spacing: -.01em; }
+.state p { color: var(--dim); margin-top: 6px; }
+.state .row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.spinner { display: inline-block; width: 16px; height: 16px; margin-right: 8px; vertical-align: -3px; border-radius: 50%;
+           border: 2px solid var(--line); border-top-color: var(--or); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.err { color: var(--err) !important; }
+audio { width: 100%; margin-top: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <svg viewBox="4 6 120 76"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EACB98"/><stop offset=".55" stop-color="#DDB077"/><stop offset="1" stop-color="#C8914F"/></linearGradient></defs><path fill="url(#g)" d="M34 72H88A20 20 0 0 0 90 32A28 28 0 0 0 38 36A18 18 0 0 0 34 72Z"/></svg>
+  <b>Голос для Cloud HDR</b><span id="mic">микрофон…</span>
+</header>
+
+<h1>Прочитайте текст — и Cloud HDR заговорит вашим голосом</h1>
+<p class="lead">Говорите естественно, как обычно разговариваете, с интонацией. Тихая комната, микрофон на одном расстоянии. Около минуты. Подсвеченный абзац — тот, что читать сейчас; щёлкните по следующему или нажмите пробел, когда дочитаете.</p>
+
+<section class="script" id="script">
+  <p class="now"><span class="hint">спокойно, дружелюбно</span>Привет! Я Cloud HDR, твой помощник прямо на этом компьютере. Смотри, что получилось: все файлы из загрузок я разложил по папкам — фото отдельно, документы отдельно. Удобно, правда?</p>
+  <p><span class="hint">с вопросом, заботливо</span>Кстати, ты давно проверял компьютер на вирусы? Давай я быстро посмотрю — это займёт всего минуту.</p>
+  <p><span class="hint">задумчиво, не спеша</span>Хм, интересный вопрос… Если коротко, то всё зависит от того, чего ты хочешь добиться. Расскажи подробнее — и я помогу.</p>
+  <p><span class="hint">радостно</span>Готово! Никаких угроз не нашёл, всё чисто. Можешь спокойно работать дальше.</p>
+  <p><span class="hint">объясняя</span>Смотри, как это устроено. Сначала я слушаю, что ты просишь, потом выбираю нужный инструмент и только после этого действую. Если что-то пошло не так, я честно об этом скажу.</p>
+  <p><span class="hint">легко, с улыбкой</span>Ну что, чем займёмся теперь? Могу найти фильм на вечер, навести порядок на рабочем столе или просто поболтать.</p>
+</section>
+
+<div class="dock">
+  <button class="rec" id="rec"><i></i><span>Начать запись</span></button>
+  <div class="meter" id="meter"></div>
+  <span class="time" id="time">0:00</span>
+</div>
+
+<section class="state" id="state"></section>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const paras = [...document.querySelectorAll('#script p')];
+  const bars = Array.from({ length: 36 }, () => $('meter').appendChild(document.createElement('i')));
+  let ctx, stream, source, node, chunks = [], rate = 48000, recording = false, started = 0, timer, now = 0, analyser;
+
+  function setNow(i) {
+    now = Math.max(0, Math.min(paras.length - 1, i));
+    paras.forEach((p, k) => { p.classList.toggle('now', k === now); p.classList.toggle('done', k < now); });
+    paras[now].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  paras.forEach((p, i) => p.onclick = () => setNow(i));
+  addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && recording) { e.preventDefault(); setNow(now + 1); }
+  });
+
+  async function openMic() {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+    ctx = new AudioContext();
+    rate = ctx.sampleRate;
+    source = ctx.createMediaStreamSource(stream);
+    analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
+    source.connect(analyser);
+    node = ctx.createScriptProcessor(4096, 1, 1);
+    node.onaudioprocess = (e) => { if (recording) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+    source.connect(node); node.connect(ctx.destination);
+    const label = stream.getAudioTracks()[0].label || 'микрофон';
+    $('mic').textContent = label.length > 40 ? label.slice(0, 38) + '…' : label;
+    const data = new Uint8Array(analyser.fftSize);
+    (function draw() {
+      analyser.getByteTimeDomainData(data);
+      let sum = 0; for (const v of data) sum += ((v - 128) / 128) ** 2;
+      const level = Math.min(1, Math.sqrt(sum / data.length) * 6);
+      bars.forEach((b, i) => {
+        const on = i / bars.length < level;
+        b.style.height = (on ? 6 + level * 26 * (0.6 + 0.4 * Math.sin(i * 1.7 + performance.now() / 180)) : 4) + 'px';
+        b.style.background = on ? 'var(--or)' : 'var(--line)';
+      });
+      requestAnimationFrame(draw);
+    })();
+  }
+
+  function encodeWav(buffers, sampleRate) {
+    const length = buffers.reduce((n, b) => n + b.length, 0);
+    const view = new DataView(new ArrayBuffer(44 + length * 2));
+    const str = (o, s) => [...s].forEach((c, i) => view.setUint8(o + i, c.charCodeAt(0)));
+    str(0, 'RIFF'); view.setUint32(4, 36 + length * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+    view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true); view.setUint16(34, 16, true); str(36, 'data'); view.setUint32(40, length * 2, true);
+    let o = 44;
+    for (const b of buffers) for (let i = 0; i < b.length; i++, o += 2) view.setInt16(o, Math.max(-1, Math.min(1, b[i])) * 0x7fff, true);
+    return new Blob([view], { type: 'audio/wav' });
+  }
+
+  function show(html) { $('state').innerHTML = html; $('state').classList.add('show'); $('state').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+
+  async function finish() {
+    recording = false;
+    clearInterval(timer);
+    $('rec').classList.remove('on'); $('rec').querySelector('span').textContent = 'Записать заново';
+    const wav = encodeWav(chunks, rate);
+    chunks = [];
+    show('<b><span class="spinner"></span>Отправляю запись…</b><p>Чищу звук от тишины и выравниваю громкость.</p>');
+    let answer;
+    try {
+      answer = await (await fetch('/voice/sample', { method: 'POST', body: wav })).json();
+    } catch { answer = { ok: false, error: 'Служба голоса не отвечает. Закройте окно и откройте ярлык ещё раз.' }; }
+    if (!answer.ok) { show(`<b class="err">Нужно перезаписать</b><p>${answer.error}</p>`); return; }
+    show(`<b><span class="spinner"></span>Клонирую голос…</b><p id="msg">Записано ${answer.speech} с чистой речи. Это займёт от 20 секунд до пары минут.</p>`);
+    const poll = async () => {
+      const s = await (await fetch('/voice/status')).json().catch(() => ({}));
+      if (s.state === 'ready') {
+        show('<b>Готово! Вот так Cloud HDR будет звучать</b><p>Это уже клон — фраза, которую вы не произносили.</p>' +
+             `<audio controls autoplay src="/voice/preview?t=${Date.now()}"></audio>` +
+             '<div class="row"><button class="rec" onclick="window.close()"><span>Отлично, готово</span></button>' +
+             '<button class="ghost" onclick="location.reload()">Записать заново</button></div>');
+        return;
+      }
+      if (s.state === 'error') { show(`<b class="err">Не получилось</b><p>${s.message}</p>`); return; }
+      if (s.message && $('msg')) $('msg').textContent = s.message;
+      setTimeout(poll, 1500);
+    };
+    poll();
+  }
+
+  $('rec').onclick = async () => {
+    if (recording) return finish();
+    try { if (!ctx) await openMic(); } catch { show('<b class="err">Нет доступа к микрофону</b><p>Разрешите микрофон и откройте окно заново.</p>'); return; }
+    await ctx.resume();
+    chunks = []; recording = true; started = performance.now(); setNow(0);
+    $('state').classList.remove('show');
+    $('rec').classList.add('on'); $('rec').querySelector('span').textContent = 'Готово — остановить';
+    timer = setInterval(() => {
+      const s = Math.floor((performance.now() - started) / 1000);
+      $('time').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    }, 250);
+  };
+
+  openMic().catch(() => { $('mic').textContent = 'микрофон не найден'; });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Cloud HDR — проверка зрения</title>
+<!--
+     Самопроверка модуля зрения.
+
+     Тот же приём, что и у voice-test.html: страница, которая ничего не просит
+     у человека и сама говорит, работает ли механика. Открывается по адресу
+     http://127.0.0.1:4477/vision-test.html при поднятом агенте.
+
+     Картинки для проверки рисуются здесь же на холсте, и это принципиально:
+     подложить настоящие фотографии значило бы проверять модуль на трёх
+     конкретных снимках, которые ещё и надо где-то хранить. Рисованные образцы
+     задают признак в чистом виде — ровные заливки для снимка экрана, зерно и
+     плавные переходы для фотографии, строки текста на белом для документа, —
+     и ответ на них известен заранее.
+
+     Проверяется не «красиво ли написано», а измерения: попал ли модуль в род
+     картинки, увидел ли пересветы там, где они нарисованы, нашёл ли текст,
+     сосчитал ли палитру. Если что-то из этого сломается при следующей правке,
+     страница покажет красную строку.
+-->
+<style>
+  body { margin: 0; padding: 28px; background: #05070f; color: #e8eefc;
+         font: 14px/1.55 "Segoe UI", system-ui, sans-serif; }
+  h1 { font-size: 19px; margin: 0 0 4px; }
+  p.lead { color: #93a4c8; margin: 0 0 22px; }
+  .case { border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 14px 16px;
+          margin-bottom: 12px; background: rgba(255,255,255,.04); }
+  .case h2 { font-size: 15px; margin: 0 0 8px; display: flex; gap: 10px; align-items: center; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; }
+  .ok { background: rgba(52,211,153,.16); color: #34d399; }
+  .no { background: rgba(251,113,133,.16); color: #fb7185; }
+  ul { margin: 6px 0 0; padding-left: 18px; color: #93a4c8; }
+  li.fail { color: #fb7185; }
+  li.pass { color: #93a4c8; }
+  pre { margin: 10px 0 0; padding: 10px; border-radius: 10px; background: rgba(0,0,0,.35);
+        color: #93a4c8; font: 12px/1.5 ui-monospace, monospace; white-space: pre-wrap; }
+  #total { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
+  canvas { display: none; }
+</style>
+</head>
+<body>
+<h1>Cloud HDR — проверка зрения</h1>
+<p class="lead">Образцы рисуются на холсте прямо здесь; наружу не уходит ничего.</p>
+<div id="total">Считаю…</div>
+<div id="out"></div>
+
+<script src="js/vision.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const out = document.getElementById('out');
+  let passed = 0, failed = 0;
+
+  // Каждый шаг проговаривается и в консоль, и в заголовок страницы: так
+  // проверку видно и глазами в окне, и из безоконного запуска браузера,
+  // которым её удобно гонять после правок.
+  const step = (text) => {
+    document.getElementById('total').textContent = text;
+    document.title = 'ЗРЕНИЕ… ' + text;
+    try { console.log('[зрение] ' + text); } catch { /* консоли может не быть */ }
+  };
+
+  /* ------------------------------------------------ рисованные образцы --- */
+
+  function canvas(w, h, draw) {
+    const node = document.createElement('canvas');
+    node.width = w; node.height = h;
+    draw(node.getContext('2d'), w, h);
+    return node;
+  }
+
+  function asFile(node, name, type, quality) {
+    return new Promise((resolve) => {
+      node.toBlob((blob) => resolve(new File([blob], name, { type: blob.type })), type, quality);
+    });
+  }
+
+  /** Фотография: плавный свет, зерно, цветной сюжет вне центра. */
+  function photoLike() {
+    return canvas(1200, 800, (ctx, w, h) => {
+      const sky = ctx.createLinearGradient(0, 0, 0, h);
+      sky.addColorStop(0, '#3f79c8');
+      sky.addColorStop(0.45, '#9fc4e8');
+      sky.addColorStop(0.46, '#6b7a4a');
+      sky.addColorStop(1, '#2f3a1e');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.fillStyle = 'rgba(240,200,140,.9)';
+      ctx.beginPath();
+      ctx.arc(w * 0.34, h * 0.3, 52, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(60,45,30,.85)';
+      for (let i = 0; i < 40; i++) {
+        const x = Math.random() * w, y = h * 0.5 + Math.random() * h * 0.5;
+        ctx.fillRect(x, y, 6 + Math.random() * 14, 4 + Math.random() * 30);
+      }
+
+      // зерно — то, чем фотография отличается от рисунка
+      const image = ctx.getImageData(0, 0, w, h);
+      for (let i = 0; i < image.data.length; i += 4) {
+        const n = (Math.random() - 0.5) * 26;
+        image.data[i] += n; image.data[i + 1] += n; image.data[i + 2] += n;
+      }
+      ctx.putImageData(image, 0, 0);
+    });
+  }
+
+  /** Снимок экрана: ровные заливки, прямые рамки, серый интерфейс. */
+  function screenLike() {
+    return canvas(1920, 1080, (ctx, w, h) => {
+      ctx.fillStyle = '#1e1e26'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#2b2b36'; ctx.fillRect(0, 0, w, 42);
+      ctx.fillStyle = '#23232c'; ctx.fillRect(0, 42, 260, h - 42);
+      ctx.fillStyle = '#33333f';
+      for (let y = 70; y < h - 40; y += 46) ctx.fillRect(18, y, 224, 30);
+      ctx.fillStyle = '#f4f4f8'; ctx.fillRect(300, 90, w - 360, h - 200);
+      ctx.fillStyle = '#4b5563';
+      for (let y = 130; y < h - 160; y += 26) ctx.fillRect(330, y, 300 + Math.random() * 900, 9);
+      ctx.fillStyle = '#5b8cff'; ctx.fillRect(w - 220, h - 90, 160, 40);
+    });
+  }
+
+  /**
+   * Документ: белый лист и строки текста.
+   *
+   * Буквы рисуются штрихами, а не сплошными прямоугольниками на слово, и это
+   * не придирка к правдоподобию. Модуль ищет текст по ЧАСТОТЕ перепадов внутри
+   * строки — то есть по промежуткам между буквами. Сплошная плашка на слово
+   * даёт два перепада вместо двадцати, и проверка мерила бы не то, что нужно.
+   */
+  function documentLike() {
+    return canvas(1000, 1400, (ctx, w, h) => {
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#1a1a1a';
+      let y = 120;
+      while (y < h - 120) {
+        const words = 5 + Math.floor(Math.random() * 6);
+        let x = 110;
+        for (let i = 0; i < words && x < w - 150; i++) {
+          const letters = 3 + Math.floor(Math.random() * 6);
+          for (let j = 0; j < letters; j++) {
+            ctx.fillRect(x, y + (Math.random() < 0.25 ? -4 : 0), 7, 13 + (Math.random() < 0.2 ? 5 : 0));
+            x += 11;
+          }
+          x += 12;
+        }
+        y += 30;
+        if (Math.random() < 0.12) y += 26;
+      }
+    });
+  }
+
+  /** Пересвеченная фотография — проверка счётчика выбитых светов. */
+  function blownLike() {
+    return canvas(900, 600, (ctx, w, h) => {
+      ctx.fillStyle = '#c9d6e4'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, Math.round(h * 0.42));
+      ctx.fillStyle = '#8fa5bb'; ctx.fillRect(0, h * 0.7, w, h * 0.3);
+      const image = ctx.getImageData(0, 0, w, h);
+      for (let i = 0; i < image.data.length; i += 4) {
+        const n = (Math.random() - 0.5) * 14;
+        image.data[i] += n; image.data[i + 1] += n; image.data[i + 2] += n;
+      }
+      ctx.putImageData(image, 0, 0);
+    });
+  }
+
+  /* ------------------------------------------------------- сами проверки - */
+
+  const report = [];
+
+  function check(title, card, rules) {
+    const box = document.createElement('div');
+    box.className = 'case';
+
+    const head = document.createElement('h2');
+    head.textContent = title;
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    head.appendChild(tag);
+    box.appendChild(head);
+
+    const list = document.createElement('ul');
+    let bad = 0;
+    rules.forEach((rule) => {
+      const ok = Boolean(rule.ok);
+      if (!ok) bad++;
+      const item = document.createElement('li');
+      item.className = ok ? 'pass' : 'fail';
+      item.textContent = `${ok ? '✓' : '✗'} ${rule.what} — ${rule.got}`;
+      list.appendChild(item);
+    });
+    box.appendChild(list);
+
+    tag.className = 'tag ' + (bad ? 'no' : 'ok');
+    tag.textContent = bad ? `${bad} мимо` : 'всё сходится';
+    bad ? failed++ : passed++;
+
+    report.push(`${title}: ${bad ? rules.filter((r) => !r.ok).map((r) => r.what + ' → ' + r.got).join('; ') : 'ок'}`);
+
+    const dump = document.createElement('pre');
+    dump.textContent = card.summary;
+    box.appendChild(dump);
+    out.appendChild(box);
+  }
+
+  async function run() {
+    if (!window.Vision) {
+      document.getElementById('total').textContent = 'Модуль зрения не загрузился — смотрите консоль.';
+      return;
+    }
+
+    try {
+      step('Рисую образец фотографии');
+      const photoFile = await asFile(photoLike(), 'photo.jpg', 'image/jpeg', 0.92);
+      step('Беру фотографию на разбор');
+      const photo = await Vision.hold(photoFile);
+      step('Разбираю фотографию');
+      const photoCard = await Vision.analyze(photo, (stage) => step('Фотография: ' + stage));
+      check('Фотография', photoCard, [
+        { what: 'род определён как фотография', ok: photoCard.kind.id === 'photo', got: photoCard.kind.title + ' ' + Vision.pct(photoCard.kind.confidence) },
+        { what: 'зерно замечено', ok: photoCard.detail.noise > 1, got: 'σ ' + photoCard.detail.noise },
+        { what: 'палитра не пустая', ok: photoCard.color.palette.length >= 3, got: photoCard.color.palette.map((c) => c.name).join(', ') },
+        { what: 'оценка выставлена', ok: photoCard.score != null, got: String(photoCard.score) },
+        { what: 'размер прочитан', ok: photoCard.w === 1200 && photoCard.h === 800, got: `${photoCard.w}×${photoCard.h}` }
+      ]);
+
+      const screen = await Vision.hold(await asFile(screenLike(), 'screen.png', 'image/png'));
+      const screenCard = await Vision.analyze(screen);
+      check('Снимок экрана', screenCard, [
+        { what: 'род определён как снимок экрана', ok: screenCard.kind.id === 'screenshot', got: screenCard.kind.title + ' ' + Vision.pct(screenCard.kind.confidence) },
+        { what: 'ровные заливки найдены', ok: screenCard.features[0] > 0.4, got: 'плоских ' + Vision.pct(screenCard.features[0]) },
+        { what: 'края по осям', ok: screenCard.features[1] > 0.4, got: Vision.pct(screenCard.features[1]) },
+        { what: 'оценка не выставлена', ok: screenCard.score == null, got: String(screenCard.score) },
+        { what: 'размер экрана узнан', ok: screenCard.features[9] === 1, got: `${screenCard.w}×${screenCard.h}` }
+      ]);
+
+      const document_ = await Vision.hold(await asFile(documentLike(), 'doc.png', 'image/png'));
+      const docCard = await Vision.analyze(document_);
+      check('Документ', docCard, [
+        { what: 'род определён как документ', ok: docCard.kind.id === 'document', got: docCard.kind.title + ' ' + Vision.pct(docCard.kind.confidence) },
+        { what: 'текст замечен', ok: docCard.frame.text > 0.2, got: 'признак ' + docCard.frame.text + ', строк ' + docCard.frame.textLines },
+        { what: 'белый фон', ok: docCard.frame && docCard.color.palette[0].name.indexOf('бел') === 0, got: docCard.color.palette[0].name },
+        { what: 'цвета почти нет', ok: docCard.color.mono, got: 'насыщенность ' + docCard.color.saturation }
+      ]);
+
+      const blown = await Vision.hold(await asFile(blownLike(), 'blown.jpg', 'image/jpeg', 0.9));
+      const blownCard = await Vision.analyze(blown);
+      check('Пересвет', blownCard, [
+        { what: 'выбитые света посчитаны', ok: blownCard.tone.blown > 0.3, got: Vision.pct(blownCard.tone.blown, 1) },
+        { what: 'совет про света есть', ok: blownCard.advice.some((a) => /света/i.test(a.title)), got: blownCard.advice.map((a) => a.title).join(' · ') || 'советов нет' },
+        { what: 'кадр назван светлым', ok: /светл/i.test(blownCard.tone.verdict), got: blownCard.tone.verdict }
+      ]);
+
+      // Паспорт кадра. Образец лежит рядом файлом и сделан не нами: EXIF в него
+      // записал GDI+ средствами Windows. Проверять свой разборщик на своей же
+      // записи смысла мало — сошлись бы обе ошибки сразу.
+      step('Читаю паспорт кадра из настоящего EXIF');
+      const exifBlob = await fetch('exif-sample.jpg').then((r) => r.blob());
+      const exifItem = await Vision.hold(new File([exifBlob], 'exif-sample.jpg', { type: 'image/jpeg' }));
+      const exifCard = await Vision.analyze(exifItem);
+      const shot = exifCard.shot || {};
+      check('Паспорт кадра (EXIF)', exifCard, [
+        { what: 'камера прочитана', ok: /Probe 7 Pro/.test(shot.camera || ''), got: shot.camera || 'нет' },
+        { what: 'выдержка прочитана', ok: shot.exposure === '1/125 с', got: shot.exposure || 'нет' },
+        { what: 'диафрагма прочитана', ok: shot.aperture === 'f/1,8', got: shot.aperture || 'нет' },
+        { what: 'чувствительность прочитана', ok: shot.iso === 320, got: String(shot.iso) },
+        { what: 'фокусное прочитано', ok: /^26 мм/.test(shot.focal || ''), got: shot.focal || 'нет' },
+        { what: 'дата съёмки прочитана', ok: /27\.08\.2026, 13:45/.test(shot.date || ''), got: shot.date || 'нет' },
+        { what: 'паспорт голосует за фотографию', ok: exifCard.features[7] === 1, got: 'признак EXIF ' + exifCard.features[7] }
+      ]);
+
+      /*
+         Обучение на поправке: сеть обязана изменить мнение о том же наборе
+         признаков.
+
+         Поправки хозяина, если они есть, откладываются в сторону и в конце
+         возвращаются на место. Проверка не имеет права стирать то, чему
+         приложение научилось у человека, — а именно это и делал бы честный
+         forget() посреди прогона.
+      */
+      step('Проверяю обучение на поправках');
+      const KEY = 'cloudhdr.vision.samples.v1';
+      const kept = localStorage.getItem(KEY);
+      Vision.forget();
+
+      const before = Vision._internals.classify(screenCard.features);
+      Vision.learn(screenCard.features, 'illustration');
+      Vision.learn(screenCard.features, 'illustration');
+      Vision.learn(screenCard.features, 'illustration');
+      const after = Vision._internals.classify(screenCard.features);
+      Vision.forget();
+      const restored = Vision._internals.classify(screenCard.features);
+
+      if (kept === null) localStorage.removeItem(KEY); else localStorage.setItem(KEY, kept);
+      Vision.reload();
+
+      // Разбор фраз. Ошибка здесь стоит дороже неточного замера: перехваченная
+      // не та фраза уводит приложение искать файл вместо ответа на вопрос.
+      step('Проверяю разбор просьб посмотреть');
+      const phrases = [
+        ['разбери мой последний скриншот', 'screenshot'],
+        ['посмотри на это фото', 'image'],
+        ['что на этой картинке', 'image'],
+        ['оцени снимок', 'image'],
+        ['сделай скриншот', null],
+        ['что такое скриншот', null],
+        ['открой хром', null],
+        ['напиши код html страницы', null]
+      ];
+      check('Разбор просьб', screenCard, phrases.map(([text, want]) => {
+        const got = Vision.asks(text);
+        return { what: `«${text}»`, ok: got === want, got: String(got) + ' (ждали ' + String(want) + ')' };
+      }));
+
+      check('Обучение на поправках', screenCard, [
+        { what: 'до поправки — снимок экрана', ok: before.id === 'screenshot', got: before.title },
+        { what: 'после трёх поправок мнение сменилось', ok: after.id === 'illustration', got: after.title + ' ' + Vision.pct(after.confidence) },
+        { what: 'сброс возвращает исходное', ok: restored.id === 'screenshot', got: restored.title }
+      ]);
+
+      Vision.clear();
+    } catch (error) {
+      failed++;
+      const box = document.createElement('div');
+      box.className = 'case';
+      box.innerHTML = '<h2>Разбор упал <span class="tag no">ошибка</span></h2>';
+      const dump = document.createElement('pre');
+      dump.textContent = error && error.stack ? error.stack : String(error);
+      box.appendChild(dump);
+      out.appendChild(box);
+      report.push('УПАЛО: ' + String(error && error.message ? error.message : error));
+    }
+
+    document.getElementById('total').textContent =
+      failed ? `Проверок пройдено ${passed}, провалено ${failed}` : `Все ${passed} проверки прошли`;
+
+    // Итог уходит и в заголовок окна. Так проверку можно гонять без окна вовсе:
+    // браузер отдаёт заголовок страницы наружу, и по нему видно, что сломалось,
+    // не читая разметку.
+    // Латинская метка в начале — чтобы итог можно было выхватить скриптом,
+    // не полагаясь на то, как тот прочитает кириллицу.
+    document.title = (failed ? `VISION-FAIL ${failed}/${passed + failed}` : `VISION-OK ${passed}/${passed}`) +
+                     ' || ' + report.join(' | ');
+  }
+
+  run();
+})();
+</script>
+</body>
+</html>

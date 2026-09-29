@@ -1,0 +1,67 @@
+﻿{
+    "port":  4477,
+    "host":  "127.0.0.1",
+    "openBrowserOnStart":  false,
+    "requirePin":  false,
+    "permissions":  {
+                        "allowApps":  true,
+                        "allowAnyApp":  true,
+                        "allowFolders":  true,
+                        "allowWeb":  true,
+                        "allowSystem":  true,
+                        "allowClose":  true,
+                        "allowScan":  true
+                    },
+    "rateLimit":  {
+                      "actionsPerMinute":  30
+                  },
+    "quickBar":  {
+                     "hotkey":  "Ctrl+Alt+P",
+                     "lensHotkey":  "Ctrl+Shift+F",
+                     "side":  "right",
+                     "tracking":  true
+                 },
+    "listen":  {
+                   "enabled":  true,
+                   "sense":  "обычный"
+               },
+    "cursor":  {
+                   "grantMinutes":  30,
+                   "maxTaskMinutes":  6,
+                   "word":  "curs"
+               },
+    "scan":  {
+                 "roots":  [],
+                 "maxResults":  40,
+                 "maxDepth":  4,
+                 "deepMaxDepth":  6,
+                 "budgetMs":  9000,
+                 "deepBudgetMs":  25000
+             },
+    "allowedFolderRoots":  [
+                               "%USERPROFILE%",
+                               "%PUBLIC%",
+                               "D:\\",
+                               "E:\\"
+                           ],
+    "allowedUriSchemes":  [
+                              "http",
+                              "https",
+                              "roblox",
+                              "roblox-player",
+                              "discord",
+                              "steam",
+                              "spotify",
+                              "tg",
+                              "ms-settings",
+                              "vscode",
+                              "calculator",
+                              "com.epicgames.launcher"
+                          ],
+    "searchEngine":  "https://www.google.com/search?q=",
+    "screenshotDir":  "%USERPROFILE%\\Pictures\\CloudHDR",
+    "logging":  {
+                    "enabled":  true,
+                    "file":  "logs/actions.log"
+                }
+}

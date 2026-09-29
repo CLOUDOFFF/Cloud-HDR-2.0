@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark light" />
+<meta name="description" content="Cloud HDR AI — ИИ-помощник, который управляет вашим ПК голосом и текстом." />
+<title>Cloud HDR AI</title>
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/clean.css" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#F3DFC1" />
+<meta name="application-name" content="Cloud HDR" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+</head>
+<body>
+
+<!-- ============================== SVG-спрайт ============================== -->
+<svg class="sprite" aria-hidden="true">
+  <defs>
+    <!-- Песочное облако: светлый песок сверху, тёплая охра снизу — как дюна
+         под солнцем. Один знак для логотипа, пустого экрана и заставки. -->
+    <linearGradient id="gradCloud" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EACB98" />
+      <stop offset="55%" stop-color="#DDB077" />
+      <stop offset="100%" stop-color="#C8914F" />
+    </linearGradient>
+    <linearGradient id="gradCloudSoft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF7EA" />
+      <stop offset="100%" stop-color="#F4A765" />
+    </linearGradient>
+  </defs>
+
+  <!-- Облако из презентации второй версии: плоское дно и два купола. -->
+  <symbol id="i-cloud" viewBox="4 6 120 76">
+    <path d="M34 72H88A20 20 0 0 0 90 32A28 28 0 0 0 38 36A18 18 0 0 0 34 72Z" />
+  </symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M3.4 20.4 21.85 12.5c.86-.37.86-1.6 0-1.96L3.4 2.63c-.7-.3-1.47.22-1.4.98l.83 6.1c.06.42.37.76.79.85l8.9 1.44-8.9 1.44c-.42.09-.73.43-.79.85l-.83 6.1c-.07.76.7 1.28 1.4.98z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15z"/><path d="M18.5 11a1 1 0 1 0-2 0 4.5 4.5 0 0 1-9 0 1 1 0 1 0-2 0 6.5 6.5 0 0 0 5.5 6.42V20H9a1 1 0 1 0 0 2h6a1 1 0 0 0 0-2h-2v-2.58A6.5 6.5 0 0 0 18.5 11z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M9 3h6a1 1 0 0 1 1 1v1h4a1 1 0 1 1 0 2h-1v12a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V7H4a1 1 0 0 1 0-2h4V4a1 1 0 0 1 1-1zm1 6a1 1 0 0 0-1 1v8a1 1 0 1 0 2 0v-8a1 1 0 0 0-1-1zm4 0a1 1 0 0 0-1 1v8a1 1 0 1 0 2 0v-8a1 1 0 0 0-1-1z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 1 1-4.6 13.42l-3.2 3.2a1 1 0 0 1-1.42-1.42l3.2-3.2A7.5 7.5 0 0 1 10.5 3zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-14a1 1 0 0 1 1 1v1.5a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1zm0 15.5a1 1 0 0 1 1 1V20a1 1 0 1 1-2 0v-1.5a1 1 0 0 1 1-1zM3 12a1 1 0 0 1 1-1h1.5a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1zm15.5-1H20a1 1 0 1 1 0 2h-1.5a1 1 0 1 1 0-2zM5.6 5.6a1 1 0 0 1 1.42 0l1.06 1.06A1 1 0 0 1 6.66 8.1L5.6 7.03a1 1 0 0 1 0-1.42zm10.32 10.32a1 1 0 0 1 1.42 0l1.06 1.06a1 1 0 0 1-1.42 1.42l-1.06-1.06a1 1 0 0 1 0-1.42zM18.4 5.6a1 1 0 0 1 0 1.42L17.34 8.1a1 1 0 1 1-1.42-1.42l1.06-1.06a1 1 0 0 1 1.42 0zM8.08 15.92a1 1 0 0 1 0 1.42L7.02 18.4A1 1 0 0 1 5.6 16.98l1.06-1.06a1 1 0 0 1 1.42 0z"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21.1 14.6A9 9 0 1 1 9.4 2.9a1 1 0 0 1 1.28 1.32 7 7 0 0 0 9.1 9.1 1 1 0 0 1 1.32 1.28z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20.3 5.7a1 1 0 0 1 0 1.4l-9.9 9.9a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.4l4.3 4.29 9.2-9.19a1 1 0 0 1 1.4 0z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.2 4.8 12 10.6l5.8-5.8a1 1 0 1 1 1.4 1.4L13.4 12l5.8 5.8a1 1 0 0 1-1.4 1.4L12 13.4l-5.8 5.8a1 1 0 0 1-1.4-1.4L10.6 12 4.8 6.2a1 1 0 1 1 1.4-1.4z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h4.2a2 2 0 0 1 1.5.7L12.2 6H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 9h-3.03a15.6 15.6 0 0 0-1.32-5.6A8.02 8.02 0 0 1 18.9 11zM12 4.2c.86 1.2 1.66 3.5 1.85 6.8h-3.7c.19-3.3.99-5.6 1.85-6.8zM5.1 11a8.02 8.02 0 0 1 4.35-5.6A15.6 15.6 0 0 0 8.13 11zm0 2h3.03c.13 2.1.57 4.03 1.32 5.6A8.02 8.02 0 0 1 5.1 13zM12 19.8c-.86-1.2-1.66-3.5-1.85-6.8h3.7c-.19 3.3-.99 5.6-1.85 6.8zm2.55-1.2c.75-1.57 1.19-3.5 1.32-5.6h3.03a8.02 8.02 0 0 1-4.35 5.6z"/></symbol>
+  <symbol id="i-game" viewBox="0 0 24 24"><path d="M7 6h10a5 5 0 0 1 4.9 4l.9 6.2A2.8 2.8 0 0 1 20 19.5c-.9 0-1.7-.45-2.2-1.2L16.4 16H7.6l-1.4 2.3c-.5.75-1.3 1.2-2.2 1.2a2.8 2.8 0 0 1-2.8-3.3L2.1 10A5 5 0 0 1 7 6zm1 3a1 1 0 0 0-1 1v1H6a1 1 0 1 0 0 2h1v1a1 1 0 1 0 2 0v-1h1a1 1 0 1 0 0-2H9v-1a1 1 0 0 0-1-1zm8 0a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zm2 3a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M12 3c5.5 0 10 3.58 10 8s-4.5 8-10 8c-1.05 0-2.06-.13-3-.37L4.6 20.8a1 1 0 0 1-1.55-1.05l.86-3.1C2.1 15.28 2 13.2 2 11c0-4.42 4.5-8 10-8z"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M20 3.5v11.1a3.8 3.8 0 1 1-2-3.34V7.4l-8 1.6v7.6a3.8 3.8 0 1 1-2-3.34V6.2a1 1 0 0 1 .8-.98l10-2A1 1 0 0 1 20 4.2z"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="M9.4 5.2a1 1 0 0 1 .4 1.36L5.15 15l4.65 8.44-1.75.96-5-9.06a1 1 0 0 1 0-.96l5-9.06zM14.6 5.2l5 9.06a1 1 0 0 1 0 .96l-5 9.06-1.75-.96L17.5 15l-4.65-8.44a1 1 0 0 1 1.75-1.36z" transform="translate(0 -3)"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5zM8 12h8v2H8zm0 4h6v2H8z"/></symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24"><path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm1 3v3h10V5zm0 6v2h2v-2zm4 0v2h2v-2zm4 0v2h2v-2zm-8 4v2h2v-2zm4 0v2h2v-2zm4 0v2h2v-2z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm8.9 3.5c0 .5-.05 1-.13 1.47l2.06 1.6-2 3.46-2.44-.98c-.75.63-1.6 1.12-2.53 1.44L15.5 22h-4l-.36-2.6a8.4 8.4 0 0 1-2.53-1.43l-2.44.98-2-3.46 2.06-1.6a8.6 8.6 0 0 1 0-2.94L2.17 9.35l2-3.46 2.44.98A8.4 8.4 0 0 1 9.14 5.4L9.5 2.8h4l.36 2.6c.93.32 1.78.8 2.53 1.44l2.44-.98 2 3.46-2.06 1.6c.08.48.13.97.13 1.48z"/></symbol>
+  <symbol id="i-brush" viewBox="0 0 24 24"><path d="M14.6 2.6a2 2 0 0 1 2.83 0l4 4a2 2 0 0 1 0 2.83l-9.2 9.2-6.83 2 2-6.83zM4 18c1.66 0 3 1.34 3 3H2c0-.8.31-1.56.88-2.12A2.98 2.98 0 0 1 4 18z"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm14 3.5 4-2.6a1 1 0 0 1 1.5.85v8.5a1 1 0 0 1-1.5.85l-4-2.6z"/></symbol>
+  <symbol id="i-app" viewBox="0 0 24 24"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 1.8 20 5v6.3c0 5-3.4 9.6-8 10.9-4.6-1.3-8-5.9-8-10.9V5zm-1.2 13.5 5.3-5.3-1.4-1.4-3.9 3.9-1.9-1.9-1.4 1.4z"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 1.5 4 13.2a.8.8 0 0 0 .62 1.3H10l-1.5 8.2a.5.5 0 0 0 .88.4L20 11.4a.8.8 0 0 0-.62-1.3H14l1.4-8.2a.5.5 0 0 0-.9-.4z"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 4.5v15a1 1 0 0 1-1.65.76L5.2 16.5H3a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h2.2l4.15-3.76A1 1 0 0 1 11 4.5zm4.2 2.6a1 1 0 0 1 1.4.1 7.5 7.5 0 0 1 0 9.6 1 1 0 1 1-1.5-1.3 5.5 5.5 0 0 0 0-7 1 1 0 0 1 .1-1.4zm3-3a1 1 0 0 1 1.4.06 11.5 11.5 0 0 1 0 15.68 1 1 0 1 1-1.46-1.36 9.5 9.5 0 0 0 0-12.96 1 1 0 0 1 .06-1.42z"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M9.4 3h5.2l1.5 2.2H20a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2h3.9zM12 8.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zm0 2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 5 5v2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v2h6V7a3 3 0 0 0-3-3zm0 9a2 2 0 0 0-1 3.73V18a1 1 0 1 0 2 0v-1.27A2 2 0 0 0 12 13z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.4l3.3 3.3V4a1 1 0 0 1 1-1zM4 19a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><path d="M9 2h9a2 2 0 0 1 2 2v11h-2V4H9zM5 6h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M16.6 2.6a2 2 0 0 1 2.83 0l2 2a2 2 0 0 1 0 2.83L9.5 19.35 3 21l1.65-6.5zM3 22h18v2H3z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M14.7 2.3a1 1 0 0 1 1.4 0l5.6 5.6a1 1 0 0 1-.7 1.7h-2.2l-3.2 3.2.5 3.4a1 1 0 0 1-1.7.86l-3.5-3.5-4.9 4.9a1 1 0 0 1-1.42-1.42l4.9-4.9-3.5-3.5a1 1 0 0 1 .86-1.7l3.4.5 3.2-3.2V2.99a1 1 0 0 1 .29-.7z"/></symbol>
+  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 2a1 1 0 0 1 1 1v8a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zM6.34 5.64a1 1 0 0 1 0 1.42 7 7 0 1 0 9.9 0 1 1 0 1 1 1.42-1.42 9 9 0 1 1-12.73 0 1 1 0 0 1 1.41 0z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2.2l1.9 5.1a4 4 0 0 0 2.35 2.35L21.35 11.5l-5.1 1.9a4 4 0 0 0-2.35 2.35L12 20.85l-1.9-5.1a4 4 0 0 0-2.35-2.35L2.65 11.5l5.1-1.9A4 4 0 0 0 10.1 7.3zM19 2.5l.7 1.85 1.85.7-1.85.7-.7 1.85-.7-1.85-1.85-.7 1.85-.7zM5 16.5l.6 1.55 1.55.6-1.55.6L5 20.8l-.6-1.55-1.55-.6 1.55-.6z"/></symbol>
+  <symbol id="i-ear" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7 1 1 0 0 0 2 0 5 5 0 0 1 10 0c0 1.9-.94 3-2.2 4.2-1.36 1.3-2.8 2.72-2.8 5.3a1 1 0 0 0 2 0c0-1.7.86-2.6 2.18-3.86C17.36 13.5 19 11.9 19 9a7 7 0 0 0-7-7zm0 4.5A2.5 2.5 0 0 0 9.5 9a1 1 0 0 0 2 0 .5.5 0 1 1 1 0c0 .6-.3.9-.9 1.5-.7.7-1.6 1.6-1.6 3.2a1 1 0 0 0 2 0c0-.7.3-1.05.98-1.72.68-.66 1.52-1.5 1.52-2.98A2.5 2.5 0 0 0 12 6.5zM10 19a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2z"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24"><path d="M12 3.2a3.1 3.1 0 0 0-3.06 2.6A3.4 3.4 0 0 0 6.3 9.06a3.3 3.3 0 0 0-.55 5.9 3.2 3.2 0 0 0 3.2 3.64c.53 0 1.03-.13 1.47-.36V21h1.08zM13.08 3.2V21h1.07v-2.76c.44.23.94.36 1.47.36a3.2 3.2 0 0 0 3.2-3.64 3.3 3.3 0 0 0-.55-5.9 3.4 3.4 0 0 0-2.64-3.26A3.1 3.1 0 0 0 13.08 3.2z"/></symbol>
+  <symbol id="i-speak" viewBox="0 0 24 24"><path d="M11 4.5v15a1 1 0 0 1-1.65.76L5.2 16.5H3a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h2.2l4.15-3.76A1 1 0 0 1 11 4.5zM14.5 8.2a1 1 0 0 1 1.4.1 5.6 5.6 0 0 1 0 7.4 1 1 0 1 1-1.5-1.32 3.6 3.6 0 0 0 0-4.76 1 1 0 0 1 .1-1.42zm3.3-3.1a1 1 0 0 1 1.42.05 10 10 0 0 1 0 13.7 1 1 0 0 1-1.47-1.36 8 8 0 0 0 0-10.98 1 1 0 0 1 .05-1.41z"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 4.5v15a1 1 0 0 1-1.65.76L5.2 16.5H3a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h2.2l4.15-3.76A1 1 0 0 1 11 4.5zM15.3 9.3a1 1 0 0 1 1.4 0l1.3 1.3 1.3-1.3a1 1 0 1 1 1.4 1.4L19.4 12l1.3 1.3a1 1 0 0 1-1.4 1.4L18 13.4l-1.3 1.3a1 1 0 0 1-1.4-1.4l1.3-1.3-1.3-1.3a1 1 0 0 1 0-1.4z"/></symbol>
+  <symbol id="i-sos" viewBox="0 0 24 24"><path d="M12 1.8 20 5v6.3c0 5-3.4 9.6-8 10.9-4.6-1.3-8-5.9-8-10.9V5zm0 4.7a1.1 1.1 0 0 0-1.1 1.1v5a1.1 1.1 0 0 0 2.2 0v-5A1.1 1.1 0 0 0 12 6.5zm0 9a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 4.2 19.4 11a1.2 1.2 0 0 1 0 2.08L7.5 19.8A1.2 1.2 0 0 1 5.7 18.7V5.3A1.2 1.2 0 0 1 7.5 4.2z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm12.5 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 19h16v-3.4l-4.3-4.3a1 1 0 0 0-1.4 0L9 16.6l-2.3-2.3a1 1 0 0 0-1.4 0L4 15.6z"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4.5V9H8"/><path d="M12 7.5V12l3 2"/></g></symbol>
+  <symbol id="i-shield-line" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 19.5 5.8v5.6c0 4.6-3.2 8.4-7.5 9.8-4.3-1.4-7.5-5.2-7.5-9.8V5.8z"/><path d="M8.8 12.1l2.3 2.3 4.2-4.6"/></g></symbol>
+  <symbol id="i-pointer" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M6 3v15l3.8-3.7 2.8 6.3 2.6-1.1-2.8-6.2h5.4z"/></symbol>
+  <symbol id="i-translate" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 19 6.6 6.5 10.7 19M4 14.8h5.2"/><path d="M20.5 19V6.5h-3.4a3 3 0 0 0 0 6h3.4M17.3 12.5 14 19"/></g></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.6"/><path d="M10.5 18.3h3"/></g></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 4.5c5 0 9.3 3.2 11 7.5-1.7 4.3-6 7.5-11 7.5S2.7 16.3 1 12c1.7-4.3 6-7.5 11-7.5zm0 3a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zm0 2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/></symbol>
+</svg>
+
+<!-- ============================== Фон ============================== -->
+<!-- Живой mesh-градиент (js/mesh.js). Без WebGL на его месте остаётся
+     прежний мягкий свет из clean.css. -->
+<div class="backdrop" aria-hidden="true">
+  <canvas class="mesh" id="mesh"></canvas>
+</div>
+
+<!-- ============================== Приложение ============================== -->
+<div class="app" id="app" data-booted="false">
+
+  <!-- ---------- Боковая панель ---------- -->
+  <aside class="sidebar" id="sidebar">
+    <header class="brand">
+      <span class="brand__logo">
+        <svg class="logo-cloud" viewBox="4 6 120 76"><use href="#i-cloud" /></svg>
+        <i class="brand__spark"></i>
+      </span>
+      <span class="brand__text">
+        <b>Cloud <span class="grad">HDR</span></b>
+        <small>Cloud HDR AI · v1.0</small>
+      </span>
+    </header>
+
+    <button class="btn btn--new ripple" id="newChat" title="Новый чат (Ctrl K)">
+      <svg class="ic"><use href="#i-plus" /></svg>
+      <span>Новый чат</span>
+      <kbd>Ctrl K</kbd>
+    </button>
+
+    <!-- Рельса: главное — одной кнопкой. Узкая панель слева, как у ChatGPT и
+         Claude; полная (поиск и история) выезжает по кнопке «История». -->
+    <nav class="rail" aria-label="Быстрые действия">
+      <button class="rail__btn" id="railHistory" type="button" title="История чатов" aria-label="История чатов">
+        <svg class="ic"><use href="#i-history" /></svg><span>История</span>
+      </button>
+      <button class="rail__btn" type="button" data-prompt="проверь компьютер на угрозы" title="Проверить компьютер" aria-label="Проверить компьютер">
+        <svg class="ic"><use href="#i-shield-line" /></svg><span>Защита</span>
+      </button>
+      <button class="rail__btn" type="button" data-prompt="подключи телефон" title="Управление с телефона" aria-label="Управление с телефона">
+        <svg class="ic"><use href="#i-phone" /></svg><span>Телефон</span>
+      </button>
+      <button class="rail__btn" type="button" data-prompt="как переводить текст с экрана" title="Перевод с экрана — Ctrl+Alt+T" aria-label="Перевод с экрана">
+        <svg class="ic"><use href="#i-translate" /></svg><span>Перевод</span>
+      </button>
+    </nav>
+
+    <div class="side-search">
+      <svg class="ic"><use href="#i-search" /></svg>
+      <input id="historySearch" type="search" placeholder="Поиск по истории…" autocomplete="off" />
+    </div>
+
+    <div class="history" id="historyList" role="list"></div>
+
+    <footer class="side-foot">
+      <div class="status" id="agentStatus" data-state="offline">
+        <i class="status__dot"></i>
+        <span class="status__text">Агент не подключён</span>
+      </div>
+      <div class="side-actions">
+        <button class="icon-btn ripple" id="themeToggle" title="Сменить тему" aria-label="Сменить тему">
+          <svg class="ic ic--sun"><use href="#i-sun" /></svg>
+          <svg class="ic ic--moon"><use href="#i-moon" /></svg>
+        </button>
+        <button class="icon-btn ripple" id="pinToggle" title="Поверх всех окон" aria-label="Поверх всех окон" data-on="false">
+          <svg class="ic"><use href="#i-pin" /></svg>
+        </button>
+        <button class="icon-btn ripple" id="motionToggle" title="Анимации вкл/выкл" aria-label="Анимации вкл/выкл">
+          <svg class="ic ic--on"><use href="#i-bolt" /></svg>
+          <svg class="ic ic--off"><use href="#i-x" /></svg>
+        </button>
+        <button class="icon-btn ripple" id="voiceToggle" title="Озвучивать ответы" aria-label="Озвучивать ответы" data-on="true">
+          <svg class="ic ic--on"><use href="#i-speak" /></svg>
+          <svg class="ic ic--off"><use href="#i-mute" /></svg>
+        </button>
+        <button class="icon-btn ripple" id="settingsBtn" title="Настройки: токены и нейросеть" aria-label="Настройки">
+          <svg class="ic"><use href="#i-gear" /></svg>
+        </button>
+        <button class="icon-btn ripple" id="exportChat" title="Скачать чат" aria-label="Скачать чат">
+          <svg class="ic"><use href="#i-download" /></svg>
+        </button>
+        <button class="icon-btn ripple danger" id="revokeAccess" title="Отозвать разрешение" aria-label="Отозвать разрешение">
+          <svg class="ic"><use href="#i-power" /></svg>
+        </button>
+      </div>
+    </footer>
+  </aside>
+
+  <!-- ---------- Основная область ---------- -->
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn only-mobile" id="menuToggle" aria-label="Меню"><svg class="ic"><use href="#i-menu" /></svg></button>
+      <div class="topbar__title">
+        <h1 id="chatTitle">Новый чат</h1>
+        <p id="chatSubtitle">Cloud HDR AI готов управлять вашим ПК</p>
+      </div>
+      <div class="pills">
+        <span class="pill pill--model"><svg class="ic"><use href="#i-bolt" /></svg> Cloud HDR AI</span>
+        <span class="pill pill--llm" id="llmPill" hidden>
+          <svg class="ic"><use href="#i-spark" /></svg>
+          <span class="pill__value">модель</span>
+        </span>
+        <span class="pill pill--llm" id="nluPill" hidden>
+          <svg class="ic"><use href="#i-brain" /></svg>
+          <span class="pill__value">spaCy</span>
+        </span>
+        <span class="pill pill--training" id="brainPill" hidden>
+          <svg class="ic"><use href="#i-brain" /></svg>
+          <span class="pill__value">обучаюсь…</span>
+        </span>
+        <button class="pill pill--token" id="tokenPill" data-state="ok" title="Бюджет токенов">
+          <svg class="ic"><use href="#i-spark" /></svg>
+          <span class="pill__value">—</span>
+          <i class="pill__bar"><b id="tokenBar"></b></i>
+        </button>
+        <span class="pill pill--perm" id="permPill"><svg class="ic"><use href="#i-shield" /></svg> Нет доступа</span>
+      </div>
+    </header>
+
+    <section class="messages" id="messages" aria-live="polite"></section>
+
+    <!-- Приветственный экран -->
+    <section class="welcome" id="welcome">
+      <!-- Пустой экран — как у ChatGPT и Claude: знак, один вопрос и поле
+           ввода прямо под ним (поле — это composer, его ставит сюда CSS).
+           Умения — строкой подсказок под полем, а не стеной карточек. -->
+      <svg class="welcome__mark" viewBox="4 6 120 76" aria-hidden="true"><use href="#i-cloud" /></svg>
+      <h2>Чем займёмся?</h2>
+
+      <!-- Привычки: чем человек занят на этом компьютере.
+           Блок появляется, только когда агент подключён и статистике есть что
+           показать. Каждая строка кликабельна — это обычная команда «открой …»,
+           которая уходит тем же путём, что и набранная руками. -->
+      <section class="habits" id="habits" hidden>
+        <header class="habits__head">
+          <b>Вы обычно здесь</b>
+          <span class="habits__hint">Быстрый вызов: <kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>P</kbd></span>
+        </header>
+        <div class="habits__grid">
+          <div class="habits__col">
+            <span class="habits__label">Программы</span>
+            <div id="habitApps"></div>
+          </div>
+          <div class="habits__col">
+            <span class="habits__label">Сайты</span>
+            <div id="habitSites"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Композер -->
+    <footer class="composer-wrap">
+      <div class="chips" id="chips">
+        <!-- Явный вход в поиск по компьютеру. Нужен потому, что распознавание
+             намеренно сделано строгим: обычные вопросы больше не уходят
+             сканировать диски, и человеку нужен способ попросить поиск прямо. -->
+        <button class="chip chip--pc" id="pcSearchChip" title="Искать файлы и игры на дисках">
+          <svg class="ic"><use href="#i-search" /></svg> Найти на ПК
+        </button>
+        <!-- Явный вход в зрение. Перетаскивание и Ctrl+V работают всегда, но
+             узнать о них неоткуда: ни то ни другое не видно на экране. Кнопка
+             же говорит сама за себя и открывает то же самое окно выбора. -->
+        <button class="chip chip--eye" id="visionChip" title="Показать картинку и попросить разобрать">
+          <svg class="ic"><use href="#i-image" /></svg> Фото
+        </button>
+        <button class="chip" data-prompt="разбери загрузки"><svg class="ic"><use href="#i-folder" /></svg> Разобрать загрузки</button>
+        <button class="chip" data-prompt="проверь компьютер на угрозы"><svg class="ic"><use href="#i-shield-line" /></svg> Проверить ПК</button>
+        <button class="chip" data-prompt="нарисуй закат над дюнами"><svg class="ic"><use href="#i-brush" /></svg> Нарисовать</button>
+      </div>
+
+      <!-- Поднос вложений: то, что принесли, но ещё не отправили.
+           Картинку часто дают раньше вопроса — сначала перетащил, потом
+           задумался, что спросить, — и до отправки она сообщением не станет. -->
+      <div class="tray" id="visionTray" hidden></div>
+
+      <!-- Живая строка постоянного прослушивания. Показана, только когда режим
+           включён: микрофон, работающий втайне, — плохая идея сама по себе. -->
+      <div class="hear" id="hearStrip" data-state="off" hidden>
+        <i class="hear__dot"></i>
+        <span class="hear__text" id="hearText">Слушаю</span>
+        <button class="hear__run" id="hearRun" hidden>Выполнить</button>
+        <button class="hear__off" id="hearOff" title="Выключить прослушивание" aria-label="Выключить прослушивание">
+          <svg class="ic"><use href="#i-x" /></svg>
+        </button>
+      </div>
+
+      <!-- Пока помощник говорит, это видно и это можно прервать. Без такой
+           строки голос ощущается неуправляемым: перебить его нечем, кроме как
+           закрыть окно. -->
+      <div class="speaking" id="speakingStrip" hidden>
+        <span class="speaking__wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="speaking__text">Говорю</span>
+        <button class="speaking__stop" id="speakingStop" title="Замолчать" aria-label="Замолчать">
+          <svg class="ic"><use href="#i-x" /></svg>
+        </button>
+      </div>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <button type="button" class="icon-btn mic ripple" id="micBtn" title="Сказать одну команду" aria-label="Голосовой ввод">
+          <svg class="ic"><use href="#i-mic" /></svg>
+          <i class="mic__pulse"></i>
+        </button>
+        <button type="button" class="icon-btn ear ripple" id="earBtn"
+                title="Слушать постоянно — ключевое слово не нужно"
+                aria-label="Постоянное прослушивание" aria-pressed="false">
+          <svg class="ic"><use href="#i-ear" /></svg>
+          <i class="mic__pulse"></i>
+        </button>
+        <!-- Скрепка. Окно выбора файлов лежит рядом и остаётся невидимым:
+             своего вида у него нет, а место в строке ввода занимало бы. -->
+        <button type="button" class="icon-btn clip ripple" id="attachBtn"
+                title="Показать картинку — разберу её здесь, на этом компьютере"
+                aria-label="Прикрепить изображение">
+          <svg class="ic"><use href="#i-image" /></svg>
+        </button>
+        <input type="file" id="visionFile" accept="image/*" multiple hidden />
+        <textarea id="input" rows="1" maxlength="1000" placeholder="Спросите что-нибудь или дайте задачу…"></textarea>
+        <button type="submit" class="icon-btn send ripple" id="sendBtn" title="Отправить" aria-label="Отправить" disabled>
+          <svg class="ic"><use href="#i-send" /></svg>
+        </button>
+        <button type="button" class="icon-btn stop ripple" id="stopBtn" title="Остановить генерацию" aria-label="Остановить генерацию" hidden>
+          <svg class="ic"><use href="#i-x" /></svg>
+        </button>
+      </form>
+
+      <!-- Одна строка вместо двух: подсказка по клавишам и состояние модели
+           стояли отдельными абзацами и вдвоём занимали больше места, чем
+           говорили.
+
+           Подпись модели стала кнопкой со списком. Имён два — Cloud HDR 3.2 и
+           Cloud HDR Ultra, — и место для выбора здесь единственно верное: он
+           относится к следующему сообщению, а не к приложению целиком, и
+           прятать его в настройках значило бы уводить на два клика от строки,
+           где решение и принимается. Список подтягивается из /v1/models: если
+           сервер модели однажды предложит третье имя, тут ничего править не
+           придётся. -->
+      <div class="composer__foot">
+        <span class="composer__hint">Enter — отправить · Shift+Enter — перенос</span>
+
+        <div class="modelpick" id="modelPick" data-open="false">
+          <button type="button" class="composer__model modelpick__btn" id="composerModel"
+                  aria-haspopup="listbox" aria-expanded="false" title="Языковая модель проекта">
+            <i class="dot" id="modelDot"></i>
+            <span class="composer__model-name" id="modelName">Cloud HDR 3.2</span>
+            <span class="composer__model-state" id="modelState">проверяю…</span>
+            <svg class="modelpick__chev" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4z" />
+            </svg>
+          </button>
+          <div class="modelpick__menu" id="modelPickMenu" role="listbox" aria-label="Модель для ответа"></div>
+        </div>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- ============================== Заставка ============================== -->
+<!--
+     Заставка «Раскрытие диафрагмы».
+
+     Прежняя показывала готовый логотип и подписывала его буквами: облако
+     всплывало снизу, буквы падали сверху, полоска ехала внизу. Три независимых
+     движения, между собой не связанные, — на просмотре это читается как список
+     эффектов, а не как одна мысль.
+
+     Здесь мысль одна и взята из самого имени продукта. HDR — это широкий
+     динамический диапазон, то есть кадр, в котором видно и свет, и тень.
+     Поэтому знак не появляется, а ПРОЯВЛЯЕТСЯ: три кольца диафрагмы сводятся к
+     центру, свет проходит внутрь, контур облака обводит сам себя одной линией и
+     только потом наливается цветом. Одно движение переходит в следующее, и
+     всё вместе занимает те же 2,4 секунды.
+
+     Вся анимация — CSS и SVG, без единого кадра картинок и без библиотек:
+     на слабой машине это те же несколько процентов кадра, что и раньше.
+-->
+<div class="splash" id="splash" data-open="true" role="img" aria-label="Cloud HDR — технологии будущего">
+  <div class="splash__field" aria-hidden="true"></div>
+  <div class="splash__rays" aria-hidden="true"></div>
+
+  <div class="splash__stage">
+    <svg class="splash__mark" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <linearGradient id="splashEdge" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#F4A765" />
+          <stop offset="48%" stop-color="#EE7B24" />
+          <stop offset="100%" stop-color="#A9440F" />
+        </linearGradient>
+        <radialGradient id="splashCore" cx="50%" cy="46%" r="58%">
+          <stop offset="0%" stop-color="#FFF7EA" stop-opacity=".92" />
+          <stop offset="55%" stop-color="#EE7B24" stop-opacity=".42" />
+          <stop offset="100%" stop-color="#EE7B24" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+
+      <!-- Диафрагма: три кольца сводятся к центру, каждое следующее чуть позже. -->
+      <g class="splash__iris">
+        <circle class="splash__ring" style="--i:0" cx="100" cy="100" r="86" />
+        <circle class="splash__ring" style="--i:1" cx="100" cy="100" r="72" />
+        <circle class="splash__ring" style="--i:2" cx="100" cy="100" r="58" />
+      </g>
+
+      <!-- Свет, прошедший внутрь. -->
+      <circle class="splash__core" cx="100" cy="100" r="74" fill="url(#splashCore)" />
+
+      <!-- Знак. Первый путь обводит контур линией, второй наливает его цветом.
+           Внешняя группа только ставит облако (64×44) в середину кадра 200×200 —
+           её transform задан разметкой, чтобы CSS-анимация внутренней группы
+           не перетирала эту установку. -->
+      <g transform="translate(48.8 64.8) scale(.8)"><g class="splash__glyph">
+        <path class="splash__trace" pathLength="100" vector-effect="non-scaling-stroke"
+              d="M34 72H88A20 20 0 0 0 90 32A28 28 0 0 0 38 36A18 18 0 0 0 34 72Z" />
+        <path class="splash__fill"
+              d="M34 72H88A20 20 0 0 0 90 32A28 28 0 0 0 38 36A18 18 0 0 0 34 72Z" />
+      </g></g>
+    </svg>
+  </div>
+
+  <h1 class="splash__word"><span class="splash__word-text">Cloud <b>HDR</b></span></h1>
+
+  <p class="splash__tag"><i></i><span>Технологии будущего</span><i></i></p>
+
+  <div class="splash__meter"><i></i></div>
+  <span class="splash__skip">нажмите, чтобы пропустить</span>
+</div>
+
+<!-- ============================== Стартовый слайд: продукты Cloud Map ============================== -->
+<div class="intro" id="introSlide" data-open="false" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="intro__scrim"></div>
+  <div class="intro__body">
+    <span class="intro__badge">Официальные продукты</span>
+
+    <div class="intro__logo">
+      <svg class="logo-cloud logo-cloud--lg assemble" viewBox="4 6 120 76"><use href="#i-cloud" /></svg>
+    </div>
+
+    <h2 id="introTitle">Наша компания предлагает<br />ещё много <span class="grad">официального продукта</span></h2>
+    <p class="intro__lead">Все проекты Cloud Map — по прямым ссылкам ниже. Открываются в браузере.</p>
+
+    <div class="intro__links">
+      <a class="promo" style="--i:0" href="https://cloudmapofficial.netlify.app/" target="_blank" rel="noopener noreferrer">
+        <span class="promo__icon"><svg class="ic"><use href="#i-shield" /></svg></span>
+        <span class="promo__text">
+          <b>Cloud Map Official</b>
+          <small>cloudmapofficial.netlify.app</small>
+        </span>
+        <span class="promo__arrow">→</span>
+      </a>
+      <a class="promo" style="--i:1" href="https://cloudmap.netlify.app/" target="_blank" rel="noopener noreferrer">
+        <span class="promo__icon"><svg class="ic"><use href="#i-globe" /></svg></span>
+        <span class="promo__text">
+          <b>Cloud Map</b>
+          <small>cloudmap.netlify.app</small>
+        </span>
+        <span class="promo__arrow">→</span>
+      </a>
+      <a class="promo" style="--i:2" href="https://cloudmapreliz.netlify.app/" target="_blank" rel="noopener noreferrer">
+        <span class="promo__icon"><svg class="ic"><use href="#i-bolt" /></svg></span>
+        <span class="promo__text">
+          <b>Cloud Map Reliz</b>
+          <small>cloudmapreliz.netlify.app</small>
+        </span>
+        <span class="promo__arrow">→</span>
+      </a>
+    </div>
+
+    <button class="btn btn--primary ripple" id="introContinue">Продолжить в Cloud HDR</button>
+  </div>
+</div>
+
+<!-- ============================== Разрешение на управление ОС ============================== -->
+<div class="modal" id="permModal" data-open="false" role="dialog" aria-modal="true" aria-labelledby="permTitle">
+  <div class="modal__scrim"></div>
+  <div class="modal__box perm">
+    <div class="perm__halo"></div>
+
+    <div class="perm__logo">
+      <svg class="logo-cloud logo-cloud--lg assemble" viewBox="4 6 120 76"><use href="#i-cloud" /></svg>
+      <div class="scan"></div>
+    </div>
+
+    <h2 id="permTitle">Cloud HDR запрашивает<br />управление <span class="grad">Windows</span></h2>
+    <p class="perm__lead">Чтобы Cloud HDR AI мог открывать программы и папки по вашей просьбе, нужно разрешение на взаимодействие с операционной системой.</p>
+
+    <ul class="perm__list">
+      <li style="--i:0"><svg class="ic"><use href="#i-app" /></svg><div><b>Запуск любых программ</b><span>Всё, что установлено на ПК: меню «Пуск», классические программы и приложения Store</span></div></li>
+      <li style="--i:1"><svg class="ic"><use href="#i-folder" /></svg><div><b>Открытие папок</b><span>Проводник Windows в разрешённых каталогах</span></div></li>
+      <li style="--i:2"><svg class="ic"><use href="#i-globe" /></svg><div><b>Поиск в браузере</b><span>Открытие ссылок и поисковых запросов</span></div></li>
+      <li style="--i:3"><svg class="ic"><use href="#i-volume" /></svg><div><b>Система и окна</b><span>Громкость, Wi-Fi, тема, окна и программы. Выключение и сон — только после подтверждения</span></div></li>
+      <li style="--i:4"><svg class="ic"><use href="#i-folder" /></svg><div><b>Файлы</b><span>Перенос и переименование — с кнопкой «Вернуть». Удаление — только в корзину и только кнопкой</span></div></li>
+      <!-- Управление мышью стоит в списке, хотя этим разрешением оно не
+           выдаётся: у рук своё, отдельное согласие по слову «curs». Умолчать о
+           нём здесь было бы нечестно — человек должен знать, на что приложение
+           способно, ещё до того, как это предложит. -->
+      <li style="--i:5"><svg class="ic"><use href="#i-lock" /></svg><div><b>Управление мышью</b><span>Курсор, клики и набор текста — только после отдельного разрешения по слову «curs», на 30 минут</span></div></li>
+    </ul>
+
+    <div class="perm__note">
+      <svg class="ic"><use href="#i-shield" /></svg>
+      <p>Агент работает <b>локально на 127.0.0.1</b>. Данные не покидают компьютер, произвольные команды выполнить нельзя, системные папки и файлы программ не трогаются. Разрешение отзывается кнопкой <svg class="ic ic--inline"><use href="#i-power" /></svg> в любой момент.</p>
+    </div>
+
+    <div class="perm__pin" id="pinRow" hidden>
+      <label for="pinInput">Код из окна агента</label>
+      <input id="pinInput" inputmode="numeric" maxlength="6" placeholder="000000" />
+    </div>
+
+    <div class="perm__actions">
+      <button class="btn btn--ghost ripple" id="permDemo">Демо-режим</button>
+      <button class="btn btn--primary ripple" id="permAllow">
+        <svg class="ic"><use href="#i-shield" /></svg> Разрешить управление
+      </button>
+    </div>
+
+    <div class="perm__state" id="permState" hidden>
+      <div class="spinner"></div>
+      <p>Подключаюсь к локальному агенту…</p>
+    </div>
+
+    <div class="perm__fail" id="permFail" hidden>
+      <b>Агент не найден на 127.0.0.1:4477</b>
+      <p>Запустите бэкенд командой <code>node server.js</code> в папке <code>cloud-hdr\server</code> — или продолжите в демо-режиме.</p>
+      <div class="perm__actions">
+        <button class="btn btn--ghost ripple" id="permDemo2">Демо-режим</button>
+        <button class="btn btn--primary ripple" id="permRetry">Повторить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Голосовой ввод ============================== -->
+<div class="voice" id="voiceOverlay" data-open="false" role="dialog" aria-modal="true">
+  <div class="voice__scrim"></div>
+  <div class="voice__body">
+    <div class="voice__rings"><i></i><i></i><i></i><i></i></div>
+    <button class="voice__orb" id="voiceStop" aria-label="Остановить запись">
+      <svg class="ic"><use href="#i-mic" /></svg>
+    </button>
+    <div class="eq" id="eq"></div>
+    <p class="voice__label" id="voiceLabel">Слушаю…</p>
+    <p class="voice__transcript" id="voiceTranscript">Скажите, например: «открой роблокс»</p>
+    <button class="btn btn--ghost ripple" id="voiceCancel">Отмена</button>
+  </div>
+</div>
+
+<!-- ============================== Подтверждение ============================== -->
+<div class="modal" id="confirmModal" data-open="false" role="dialog" aria-modal="true">
+  <div class="modal__scrim"></div>
+  <div class="modal__box confirm">
+    <div class="confirm__icon"><svg class="ic"><use href="#i-shield" /></svg></div>
+    <h3 id="confirmTitle">Подтвердите действие</h3>
+    <p id="confirmText">Это действие затрагивает систему.</p>
+    <div class="perm__actions">
+      <button class="btn btn--ghost ripple" id="confirmNo">Отмена</button>
+      <button class="btn btn--primary ripple" id="confirmYes">Выполнить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Настройки ============================== -->
+<!--
+     Настройки. Было шесть разделов подряд в одном свитке и около четырёх тысяч
+     знаков объяснений в них. Написаны объяснения не зря — каждое отвечает на
+     живой вопрос («почему нет эха», «почему точность на проверке важнее»), — но
+     читать их приходилось ВСЕМ и КАЖДЫЙ РАЗ, включая тех, кто зашёл подкрутить
+     громкость. Настройки превратились в статью, внутри которой где-то есть
+     ползунок.
+
+     Здесь то же содержимое, разложенное по двум осям.
+
+     ПО ГОРИЗОНТАЛИ — четыре вкладки вместо одного свитка: за громкостью идут в
+     «Голос», за экстренной фразой — в «Экстренно», и мимо остального проходить
+     не нужно. Раньше до раздела о модели надо было прокрутить всё.
+
+     ПО ВЕРТИКАЛИ — у каждого раздела одна строка сути, дальше органы управления,
+     а объяснения свёрнуты в «Подробнее». Ни одна мысль не выброшена: раскрыть
+     их можно там же, где они и были нужны. Но открывает их теперь тот, у кого
+     возник вопрос, а не тот, кто просто зашёл.
+-->
+<div class="modal" id="settingsModal" data-open="false" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="modal__scrim"></div>
+  <div class="modal__box settings">
+    <header class="settings__head">
+      <h3 id="settingsTitle"><svg class="ic"><use href="#i-gear" /></svg> Настройки</h3>
+      <button class="icon-btn ripple" id="settingsClose" aria-label="Закрыть"><svg class="ic"><use href="#i-x" /></svg></button>
+    </header>
+
+    <nav class="settings__tabs" id="settingsTabs" role="tablist" aria-label="Разделы настроек">
+      <button class="settings__tab" type="button" role="tab" data-tab="model" aria-selected="true">
+        <svg class="ic"><use href="#i-spark" /></svg><span>Модель</span>
+      </button>
+      <button class="settings__tab" type="button" role="tab" data-tab="voice" aria-selected="false">
+        <svg class="ic"><use href="#i-speak" /></svg><span>Голос</span>
+      </button>
+      <button class="settings__tab" type="button" role="tab" data-tab="sos" aria-selected="false">
+        <svg class="ic"><use href="#i-sos" /></svg><span>Экстренно</span>
+      </button>
+      <button class="settings__tab" type="button" role="tab" data-tab="system" aria-selected="false">
+        <svg class="ic"><use href="#i-shield" /></svg><span>Система</span>
+      </button>
+    </nav>
+
+    <div class="settings__body" id="settingsBody" data-tab="model">
+
+      <!-- ============================ ВКЛАДКА: МОДЕЛЬ ============================ -->
+
+      <section class="pane" data-tab="model">
+        <h4><svg class="ic"><use href="#i-spark" /></svg> Модель разговора</h4>
+        <p class="pane__lead">Своя языковая модель Cloud HDR, целиком на этом компьютере. Выбрать режим можно под строкой ввода.</p>
+
+        <div class="pane__live" id="llmStatus"></div>
+        <div class="modelcards" id="modelCards"></div>
+        <div class="factgrid" id="llmFacts"></div>
+
+        <details class="pane__more">
+          <summary>Подробнее: откуда факты и что делать, если модель не запущена</summary>
+          <p class="pane__note">Команды к Windows разбирает классификатор, а не собеседник. Языковая модель подключается там, где команды нет, — на разговор, объяснения и вопросы.</p>
+          <p class="pane__note">Точные факты о мире модель берёт из Википедии и приводит дословно, со ссылкой на статью: пересказ своими словами она делает гладко, но переставляет даты и имена. Всё остальное — разговор, объяснения, тексты — её собственная работа.</p>
+          <p class="pane__note">Не запущена — значит, свободные вопросы остаются без ответа, а команды работают как обычно. Поднять вручную: <code>cd python</code>, затем <code>python -m cloudhdr_ai serve</code>. Или просто <code>start-ai.bat</code> — он поднимает всё сразу.</p>
+        </details>
+      </section>
+
+      <!-- ============================ ВКЛАДКА: ГОЛОС ============================ -->
+
+      <section class="pane pane--voice" data-tab="voice">
+        <h4><svg class="ic"><use href="#i-speak" /></svg> Озвучка ответов</h4>
+        <p class="pane__lead">Голос синтезируется здесь же — текст ответа никуда не отправляется.</p>
+
+        <div class="pane__live" id="voiceStatus"></div>
+
+        <label class="field--switch" for="voiceEnabled">
+          <input type="checkbox" id="voiceEnabled" checked />
+          <span>Озвучивать ответы</span>
+        </label>
+
+        <div class="seg" id="voicePreset" role="radiogroup" aria-label="Характер голоса"></div>
+        <p class="pane__note" id="voicePresetNote"></p>
+
+        <div class="grid2">
+          <label class="field">
+            <span>Голос</span>
+            <select id="voiceName" class="select"></select>
+          </label>
+          <label class="field">
+            <span>Крупность <b class="field__value" id="voiceDepthValue">1.00</b></span>
+            <input type="range" id="voiceDepth" min="0.85" max="1.05" step="0.01" value="1" />
+          </label>
+          <label class="field">
+            <span>Темп <b class="field__value" id="voiceRateValue">−4%</b></span>
+            <input type="range" id="voiceRate" min="-30" max="30" step="1" value="-4" />
+          </label>
+          <label class="field">
+            <span>Тон <b class="field__value" id="voicePitchValue">−1</b></span>
+            <input type="range" id="voicePitch" min="-6" max="6" step="0.5" value="-1" />
+          </label>
+          <label class="field">
+            <span>Громкость <b class="field__value" id="voiceVolumeValue">85%</b></span>
+            <input type="range" id="voiceVolume" min="0" max="100" step="5" value="85" />
+          </label>
+        </div>
+
+        <div class="pane__actions">
+          <button class="btn btn--primary ripple" id="voicePreview">
+            <svg class="ic"><use href="#i-play" /></svg> Послушать
+          </button>
+          <button class="btn btn--ghost ripple" id="voiceStopBtn">Замолчать</button>
+          <button class="btn btn--ghost ripple" id="voiceReset">Вернуть настройки</button>
+        </div>
+
+        <details class="pane__more">
+          <summary>Подробнее: почему голос звучит именно так</summary>
+          <p class="pane__note"><b>Про «точь-в-точь как Джарвис» — честно.</b> Выговор Пола Беттани из русского синтезатора не достаётся: акцент живёт в самих записанных звуках, а не в обработке над ними, и мужской голос в системе ровно один — русский «Microsoft Pavel». Достижимое сделано: баритон вместо обычного мужского регистра, ровная неспешная подача и плотная компрессия, которая держит громкость одинаковой от фразы к фразе.</p>
+          <p class="pane__note"><b>Почему нет эха и «объёма».</b> Они там были: короткий двойник голоса, широкая подача, отзвук большого помещения — приёмы, которыми обычно и делают «голос ИИ». На замере оказалось, что копии с задержками 11 и 24 мс выгрызают в спектре гребёнку прямо в голосовой полосе, и вместо собранности получается гулкость. Убрано целиком: Джарвис говорит близко и сухо, а не из соседнего зала.</p>
+          <p class="pane__note"><b>Крупность</b> — это не «тон» ещё раз. Тон опускает высоту, оставляя форманты на месте: тот же человек, говорящий ниже. Крупность тянет вниз и форманты, а они задаются размером резонатора — говорящий начинает звучать крупнее, и на слух это ровно «как из бочки». Поэтому по умолчанию тут единица, а всё понижение отдано тону. Двигать вниз стоит осознанно.</p>
+          <p class="pane__note">Голос берётся из набора OneCore — того же, что у Windows в приложениях чтения. Онлайновые голоса браузера («Google русский») не используются вовсе: они синтезируются на чужом сервере, а значит, туда пришлось бы отправить текст ответа.</p>
+        </details>
+      </section>
+
+      <section class="pane" data-tab="voice">
+        <h4><svg class="ic"><use href="#i-ear" /></svg> Постоянное прослушивание</h4>
+        <p class="pane__lead">Ключевое слово не нужно. Выполняется только похожее на команду: «открой кс го», «сделай скриншот».</p>
+
+        <div class="pane__live" id="listenStats"></div>
+
+        <div class="seg" id="listenProfile" role="radiogroup" aria-label="Чувствительность">
+          <button class="seg__btn" data-profile="strict" role="radio" aria-checked="false">Строгий</button>
+          <button class="seg__btn" data-profile="normal" role="radio" aria-checked="true">Обычный</button>
+          <button class="seg__btn" data-profile="open" role="radio" aria-checked="false">Чуткий</button>
+        </div>
+        <p class="pane__note" id="listenProfileNote"></p>
+
+        <div class="pane__actions">
+          <button class="btn btn--primary ripple" id="listenToggle">Включить</button>
+        </div>
+
+        <details class="pane__more">
+          <summary>Подробнее: как отсеивается лишнее и что уходит в сеть</summary>
+          <p class="pane__note">Решение принимается по трём признакам сразу: голос должен быть громче тишины в комнате (так отличается сказанное вам от сказанного рядом), фраза — иметь форму поручения, а цель — найтись среди установленного здесь. Обойти нужно все три, поэтому случайной реплике это почти не удаётся.</p>
+          <p class="pane__note">Честно про приватность: <b>сами слова распознаёт браузер</b> — Chrome отправляет звук в свой сервис. Это единственная часть Cloud HDR, которая выходит за пределы компьютера, и работает она только пока режим включён. Разбор, решение и выполнение — целиком здесь.</p>
+        </details>
+      </section>
+
+      <!-- ========================== ВКЛАДКА: ЭКСТРЕННО ========================== -->
+
+      <section class="pane pane--sos" data-tab="sos">
+        <h4><svg class="ic"><use href="#i-sos" /></svg> Экстренная помощь</h4>
+        <p class="pane__lead">Своя фраза — своё действие. Срабатывает сразу: без разбора запроса, подтверждений и расхода токенов.</p>
+
+        <div class="sos__form">
+          <label class="field">
+            <span>Фраза-сигнал</span>
+            <input id="sosPhrase" type="text" maxlength="60" placeholder="например: код красный" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Что открыть</span>
+            <input id="sosTarget" type="text" maxlength="200" placeholder="хром · папку загрузки · https://…" autocomplete="off" />
+          </label>
+          <button class="btn btn--primary ripple" id="sosAdd">
+            <svg class="ic"><use href="#i-plus" /></svg> Добавить
+          </button>
+        </div>
+        <p class="pane__note" id="sosHint">Что открыть — обычными словами: «телеграм», «папку документы», «D:\важное», «https://112.ru». Понял или нет — покажу сразу после добавления.</p>
+
+        <div class="sos__list" id="sosList"></div>
+
+        <label class="field--switch" for="sosAnnounce">
+          <input type="checkbox" id="sosAnnounce" checked />
+          <span>Сообщать вслух о срабатывании</span>
+        </label>
+
+        <details class="pane__more">
+          <summary>Подробнее: как распознаётся фраза</summary>
+          <p class="pane__note">Фраза работает и голосом — она проходит мимо всех фильтров прослушивания, поэтому годится и то, что на команду совсем не похоже: «мне плохо», «код красный», «сос».</p>
+          <p class="pane__note">Фразы хранятся только на этом компьютере. Совпадение засчитывается, даже если фраза сказана внутри длинного предложения или с одной ошибкой: в момент, ради которого это настроено, говорят не по бумажке.</p>
+        </details>
+      </section>
+
+      <!-- =========================== ВКЛАДКА: СИСТЕМА =========================== -->
+
+      <section class="pane" data-tab="system">
+        <h4><svg class="ic"><use href="#i-spark" /></svg> Бюджет токенов</h4>
+        <p class="pane__lead">Запас обновляется каждый час. Один запрос — 2 токена из 900.</p>
+
+        <div class="budget">
+          <div class="budget__head">
+            <span class="budget__percent" id="setPercent">0%</span>
+            <span class="budget__note" id="setUsed">—</span>
+          </div>
+          <div class="budget__track"><b id="setBar" style="width:0%"></b></div>
+          <div class="budget__foot">
+            <span id="setWindowLeft">—</span>
+            <span id="setTotal">—</span>
+          </div>
+        </div>
+
+        <div class="factgrid" id="tokenFacts"></div>
+        <p class="pane__lead pane__lead--dim" id="setTamper" hidden></p>
+
+        <details class="pane__more">
+          <summary>Подробнее: что именно считается</summary>
+          <p class="pane__note">Счёт ведётся локально, метки времени абсолютные — перезагрузка вкладки запас не сбрасывает. Лимит касается только запросов к языковой модели: команды Windows, поиск файлов и расчёты токенов не тратят.</p>
+        </details>
+      </section>
+
+      <section class="pane" data-tab="system">
+        <h4><svg class="ic"><use href="#i-brain" /></svg> Разбор команд</h4>
+        <p class="pane__lead">Понимание команд даёт отдельная маленькая сеть — она обучается прямо в этом окне и правится вашими поправками.</p>
+
+        <div class="pane__live" id="brainStats"></div>
+
+        <div class="grid2">
+          <label class="field">
+            <span>Предел эпох обучения</span>
+            <input type="number" id="brainEpochs" min="10" max="600" step="10" value="140" />
+          </label>
+        </div>
+
+        <div class="pane__actions">
+          <button class="btn btn--primary ripple" id="brainRetrain">Переобучить</button>
+          <button class="btn btn--ghost ripple" id="brainForget">Сбросить обучение</button>
+          <button class="btn btn--ghost ripple" id="memoryClear">Стереть личные заметки</button>
+        </div>
+
+        <details class="pane__more">
+          <summary>Подробнее: на какое число здесь смотреть</summary>
+          <p class="pane__note" id="brainNote">Смотрите на «точность на проверке» — она измерена на фразах, которых сеть при обучении не видела, и потому честная. «Точность на обучении» почти всегда 100% и ни о чём не говорит. Итоговые веса — среднее по второй половине эпох: выбирать «лучшую эпоху» по маленькой проверочной выборке значит подгоняться под неё саму, и результат скакал от запуска к запуску. Температура калибровки приводит уверенность в соответствие с реальной долей верных ответов.</p>
+        </details>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- Перетаскивание. Полотно на всё окно появляется только когда над ним что-то
+     тащат: пунктирная рамка вокруг чата, висящая всё время, обещала бы то, чего
+     в остальное время не происходит. -->
+<div class="dropzone" id="dropZone" hidden>
+  <div class="dropzone__box">
+    <svg class="ic"><use href="#i-image" /></svg>
+    <b>Отпустите — посмотрю</b>
+    <span>Разбор идёт здесь, на этом компьютере. Картинка никуда не уходит.</span>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="js/brain.js"></script>
+<script src="js/skills.js"></script>
+<script src="js/tokens.js"></script>
+<script src="js/llm.js"></script>
+<script src="js/nlu-spacy.js"></script>
+<script src="js/nlu.js"></script>
+<!-- sos.js стоит ДО voice.js: гейт микрофона спрашивает у SOS про экстренные
+     фразы прямо в разборе, и на момент его загрузки модуль должен быть готов. -->
+<script src="js/sos.js"></script>
+<script src="js/tts.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/api.js"></script>
+<!-- cursor.js стоит ПОСЛЕ api.js: пропуск для агента он берёт у него, и на
+     момент первой просьбы к рукам тот должен быть готов. -->
+<script src="js/cursor.js"></script>
+<!-- vision.js — тоже после api.js: за снимком экрана с диска зрение ходит
+     к агенту его пропуском. -->
+<script src="js/vision.js"></script>
+<script src="js/app.js"></script>
+<script src="js/mesh.js"></script>
+<!-- Умения второй версии — после app.js: им нужен мост window.CloudChat. -->
+<script src="js/features.js"></script>
+</body>
+</html>

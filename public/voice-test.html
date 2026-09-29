@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><title>Cloud HDR — проверка гейта</title></head>
+<body>
+<pre id="out">…</pre>
+<script src="js/nlu.js"></script>
+<script src="js/voice.js"></script>
+<script>
+// Словарь «этого компьютера» подменён вручную: проверяется гейт, а не агент.
+Listener.setVocabulary({
+  names: ['Discord', 'Google Chrome', 'Microsoft Edge', 'Adobe Photoshop 2024', 'Telegram Desktop', 'Steam'],
+  games: ['Counter-Strike 2', 'Dota 2', 'Brawl Stars', 'Minecraft Launcher']
+});
+
+const COMMANDS = [
+  'открой хром', 'запусти кс го', 'открой кс го', 'включи дискорд', 'закрой дискорд',
+  'открой папку загрузки', 'сделай скриншот', 'громче', 'тише', 'заблокируй пк',
+  'открой ютуб', 'загугли погоду в москве', 'найди файл отчет', 'просканируй диски',
+  'запусти майнкрафт', 'открой роблокс', 'открой стим', 'открой фотошоп',
+  'запусти брав старс', 'открой телеграм', 'ну открой уже хром', 'открой мне папку загрузки',
+  'hdr сколько сейчас времени', 'клауд закрой дискорд', 'открой рабочий стол',
+  'убавь звук', 'запиши экран', 'останови запись', 'открой гугл карты', 'открой d:\\games',
+  'запусти в стиме кс 2', 'перейди на ютуб', 'сверни всё', 'открой youtube.com',
+  'поставь таймер на пять минут', 'открой контру', 'включи доту', 'закрой хром',
+  'найди игру амонг ас', 'открой диспетчер задач', 'запусти блокнот', 'открой проводник',
+  'ассистент открой настройки', 'сделай потише', 'открой эпик геймс'
+];
+
+const CHATTER = [
+  'да я вчера открыл хром и там всё зависло',
+  'как думаешь что лучше взять',
+  'слушай а ты помнишь как мы вчера в доту играли',
+  'ну короче я ему говорю что надо закрыть этот вопрос',
+  'почему так холодно на улице',
+  'он сказал что запустит проект завтра',
+  'не открывай хром',
+  'закрой дверь пожалуйста',
+  'включи свет',
+  'что там по погоде',
+  'ага понятно',
+  'сколько стоит эта штука',
+  'мам я потом приду',
+  'где ты был вчера вечером',
+  'открой',
+  'я думаю нам надо закрыть окно',
+  'а что если мы завтра поедем',
+  'нет ну это вообще ни в какие ворота',
+  'кто последний тот и закрывает',
+  'да ладно тебе',
+  'смотри какой закат красивый',
+  'вчера дискорд опять лагал у всех',
+  'она говорит что стим не запускается',
+  // Приложения в обычной речи — самый опасный класс: нужные слова есть,
+  // а поручения нет.
+  'хром опять жрёт всю память',
+  'у меня стим не обновляется уже неделю',
+  'в дискорде вчера был какой то шум',
+  'а майнкрафт вообще не запускается на этом ноуте',
+  'да я в кс го уже сто лет не играл',
+  'фотошоп стоит как крыло от самолёта',
+  // Повелительное наклонение, но не компьютеру.
+  'открой глаза уже',
+  'закрой рот пожалуйста',
+  'открой окно душно',
+  'включи чайник',
+  'поставь чайник пожалуйста',
+  'сделай мне чай',
+  // Обрывки речи и телевизор.
+  'и тогда он говорит открывай давай быстрее',
+  'дальше по прогнозу дожди в центральной части',
+  'подпишись на канал и поставь лайк',
+  'нет я не про это говорил совсем',
+  'слушай а во сколько мы завтра встречаемся',
+  'мне кажется надо перезагрузить роутер'
+];
+
+const lines = [];
+let bad = 0;
+
+for (const profile of ['strict', 'normal', 'open']) {
+  let miss = 0, falsePositive = 0;
+  lines.push('');
+  lines.push('=== профиль: ' + profile + ' ===');
+
+  lines.push('-- должны выполняться --');
+  for (const text of COMMANDS) {
+    const r = Listener.probe(text, profile);
+    const ok = r.verdict === 'run';
+    if (!ok) { miss++; if (profile === 'normal') bad++; }
+    lines.push((ok ? '  ok   ' : '  MISS ') + String(r.score).padEnd(6) + text + (ok ? '' : '   << ' + r.why));
+  }
+
+  lines.push('-- должны игнорироваться --');
+  for (const text of CHATTER) {
+    const r = Listener.probe(text, profile);
+    const ok = r.verdict !== 'run';
+    if (!ok) { falsePositive++; if (profile === 'normal') bad++; }
+    lines.push((ok ? '  ok   ' : '  FALSE') + String(r.score).padEnd(6) + '[' + r.verdict + '] ' + text + (ok ? '' : '   << ' + r.why));
+  }
+
+  lines.push(`итог ${profile}: пропущено команд ${miss}/${COMMANDS.length}, ложных срабатываний ${falsePositive}/${CHATTER.length}`);
+}
+
+lines.push('');
+lines.push('ОШИБОК В ПРОФИЛЕ normal: ' + bad);
+document.getElementById('out').textContent = lines.join('\n');
+
+/* --- запрет одной гипотезы отменяет всю фразу ---------------------------- */
+{
+  const cases = [
+    { name: 'отказ против ослышки', alts: ['не открывай хром', 'открывай хром'] },
+    { name: 'дверь против дискорда', alts: ['закрой дверь', 'закрой дискорд'] },
+    { name: 'обычный перебор гипотез', alts: ['открой к с го', 'открой кс го'] }
+  ];
+  lines.push('');
+  lines.push('=== перебор гипотез распознавателя ===');
+  for (const item of cases) {
+    const graded = item.alts.map((t) => Listener.probe(t, 'normal'));
+    const vetoed = graded.some((g) => g.veto);
+    const bestRun = graded.some((g) => g.verdict === 'run');
+    const verdict = vetoed ? 'ОТМЕНЕНА' : (bestRun ? 'выполнится' : 'пропущена');
+    const want = item.name === 'обычный перебор гипотез' ? 'выполнится' : 'ОТМЕНЕНА';
+    lines.push((verdict === want ? '  ok   ' : '  ПЛОХО') + item.name.padEnd(28) + '→ ' + verdict);
+    if (verdict !== want) bad++;
+  }
+  document.getElementById('out').textContent = lines.join('\n');
+}
+
+/* --- вторая часть: словарь берётся с живого агента, а не выдуманный ------ */
+(async () => {
+  const real = [];
+  try {
+    const grant = await (await fetch('/api/session/grant', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+    })).json();
+    const apps = await (await fetch('/api/apps', { headers: { 'X-Cloud-Token': grant.token } })).json();
+    const size = Listener.setVocabulary({ names: apps.names, games: apps.games });
+
+    real.push('');
+    real.push('=== словарь живого агента: ' + size + ' названий ===');
+    for (const text of [
+      'открой бимку', 'запусти вуконг', 'открой капкат', 'включи гмод',
+      'запусти геометри даш', 'открой энидеск', 'запусти саб натику',
+      'открой ардуино', 'запусти бакшот', 'открой торрент'
+    ]) {
+      const r = Listener.probe(text, 'normal');
+      real.push('  ' + (r.verdict === 'run' ? 'ok  ' : r.verdict + ' ') + String(r.score).padEnd(6) +
+                text.padEnd(24) + (r.target ? '→ ' + r.target.name : '(цель не узнана)'));
+    }
+  } catch (error) {
+    real.push('', 'агент недоступен: ' + error.message);
+  }
+  document.getElementById('out').textContent += '\n' + real.join('\n');
+})();
+</script>
+</body>
+</html>

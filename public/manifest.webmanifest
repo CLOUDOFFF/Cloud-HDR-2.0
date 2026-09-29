@@ -1,0 +1,30 @@
+{
+  "id": "cloud-hdr",
+  "name": "Cloud HDR AI",
+  "short_name": "Cloud HDR",
+  "description": "ИИ-помощник Cloud HDR AI: открывает программы и папки на вашем ПК голосом и текстом.",
+  "lang": "ru",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#F7EFE3",
+  "theme_color": "#F7EFE3",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Голосовой запрос",
+      "short_name": "Голос",
+      "description": "Открыть Cloud HDR и сразу начать слушать",
+      "url": "/?voice=1",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
